@@ -47,6 +47,10 @@ exports.login = async (req, res) => {
       });
     }
 
+    console.log("EMAIL =", email);
+    console.log("PASSWORD RECU =", password);
+    console.log("HASH BDD =", user.password);
+
     const isMatch = await bcrypt.compare(
       password,
       user.password

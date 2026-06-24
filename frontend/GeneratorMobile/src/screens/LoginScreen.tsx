@@ -13,25 +13,61 @@ const LoginScreen = ({ navigation }: any) => {
   // VOICI LA CORRECTION : Le mot-clé 'async' est ici, avant la parenthèse
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://192.168.1.137:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      console.log("Tentative de connexion...");
 
-      const data = await response.json();
+      console.log("Début requête");
+
+      const response = await fetch('http://192.168.1.137:5000/api/auth/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      console.log("Status :", response.status);
+
+      const text = await response.text();
+
+      console.log("Réponse brute :", text);
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch (error: any) {
+          console.log("=================================");
+          console.log("ERREUR COMPLETE");
+          console.log(error);
+          console.log("MESSAGE :", error?.message);
+          console.log("=================================");
+
+          Alert.alert(
+            "Erreur",
+            error?.message || JSON.stringify(error)
+          );
+        }
 
       if (response.ok) {
-        // Sauvegarde sécurisée
         await AsyncStorage.setItem('token', data.token);
-        // Mise à jour du contexte -> fait basculer la navigation vers Home automatiquement
         setToken(data.token);
       } else {
-        Alert.alert('Erreur', data.error || data.message || 'Connexion échouée');
+        Alert.alert(
+          'Erreur',
+          data.error || data.message || 'Connexion échouée'
+        );
       }
     } catch (error: any) {
-      console.error(error);
-      Alert.alert('Erreur', error.message);
+      console.log("ERREUR COMPLETE =", error);
+      Alert.alert(
+        "Network Error",
+        error?.message || JSON.stringify(error)
+      );
     }
   };
 
