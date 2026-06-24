@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,13 @@ import {
 } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../context/AuthContext';
 
 const HomeScreen = ({ navigation }: any) => {
+  const { logout } = useContext(AuthContext);
 
   const testProtectedRoute = async () => {
     try {
-
       const token = await AsyncStorage.getItem('token');
 
       const response = await fetch(
@@ -28,20 +29,13 @@ const HomeScreen = ({ navigation }: any) => {
 
       const data = await response.json();
 
-      console.log(data);
-
       Alert.alert(
-        'Succès',
+        'JWT OK ✅',
         JSON.stringify(data, null, 2)
       );
 
     } catch (error: any) {
-      console.log(error);
-
-      Alert.alert(
-        'Erreur',
-        error.message
-      );
+      Alert.alert('Erreur', error.message);
     }
   };
 
@@ -49,28 +43,50 @@ const HomeScreen = ({ navigation }: any) => {
     <View style={styles.container}>
 
       <Text style={styles.title}>
-        Générateur de Memes
+        🎭 Générateur de Memes
       </Text>
 
       <Text style={styles.subtitle}>
-        Enregistrez votre voix pour créer un meme
+        Audio + Image + IA (bientôt Gemini)
       </Text>
 
+      {/* 🎤 AUDIO MEME */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate('AudioRecord')}
       >
         <Text style={styles.buttonText}>
-          Démarrer un nouveau Meme
+          🎤 Démarrer un Meme Audio
         </Text>
       </TouchableOpacity>
 
+      {/* 🧪 TEST JWT */}
       <TouchableOpacity
-        style={[styles.button, { marginTop: 15 }]}
+        style={[styles.button, { backgroundColor: '#28a745', marginTop: 15 }]}
         onPress={testProtectedRoute}
       >
         <Text style={styles.buttonText}>
-          Tester JWT
+          🔐 Tester JWT
+        </Text>
+      </TouchableOpacity>
+
+      {/* 🖼 IMAGE UPLOAD (future screen) */}
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: '#ff9800', marginTop: 15 }]}
+        onPress={() => navigation.navigate('ImageUpload')}
+      >
+        <Text style={styles.buttonText}>
+          🖼 Upload Image
+        </Text>
+      </TouchableOpacity>
+
+      {/* 🚪 LOGOUT */}
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: '#dc3545', marginTop: 15 }]}
+        onPress={logout}
+      >
+        <Text style={styles.buttonText}>
+          🚪 Logout
         </Text>
       </TouchableOpacity>
 
@@ -84,30 +100,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f5f5f5'
   },
 
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 10
   },
 
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
     marginBottom: 30,
+    textAlign: 'center'
   },
 
   button: {
     backgroundColor: '#007AFF',
     padding: 15,
     borderRadius: 10,
+    width: '100%'
   },
 
   buttonText: {
     color: '#fff',
-    fontSize: 18,
-  },
+    fontSize: 16,
+    textAlign: 'center'
+  }
 });
 
 export default HomeScreen;

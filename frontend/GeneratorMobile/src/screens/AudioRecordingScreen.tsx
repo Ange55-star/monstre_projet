@@ -1,68 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-//import { Audio } from 'expo-av';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+
+import AudioRecorder from 'react-native-audio-recorder';
 
 const AudioRecordingScreen = () => {
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [lastUri, setLastUri] = useState<string | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioFile, setAudioFile] = useState<string | null>(null);
 
-  useEffect(() => {
-    const prepareAudio = async () => {
-      try {
-        const { status } = await Audio.requestPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Permission requise', 'L\'accès au micro est nécessaire.');
-        }
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-        });
-        setIsReady(true);
-      } catch (err) {
-        console.error("Erreur init audio:", err);
-      }
-    };
-    prepareAudio();
-  }, []);
-
-  async function startRecording() {
+  const startRecording = async () => {
     try {
-      const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-      setRecording(recording);
-    } catch (err) {
-      Alert.alert('Erreur', 'Impossible de démarrer l\'enregistrement');
+      await AudioRecorder.startRecording();
+      setIsRecording(true);
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Erreur', "Impossible de démarrer l'enregistrement");
     }
-  }
+  };
 
-  async function stopRecording() {
-    if (!recording) return;
-    await recording.stopAndUnloadAsync();
-    setLastUri(recording.getURI());
-    setRecording(null);
-  }
+  const stopRecording = async () => {
+    try {
+      const filePath = await AudioRecorder.stopRecording();
+      setIsRecording(false);
+      setAudioFile(filePath);
 
-  if (!isReady) return <ActivityIndicator style={{ flex: 1 }} />;
+      Alert.alert('Succès', 'Audio enregistré');
+      console.log('Audio:', filePath);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Générateur de Memes</Text>
+      <Text style={styles.title}>Audio Recorder</Text>
+
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: recording ? '#d32f2f' : '#388e3c' }]}
-        onPress={recording ? stopRecording : startRecording}
+        style={[
+          styles.button,
+          { backgroundColor: isRecording ? '#d32f2f' : '#388e3c' },
+        ]}
+        onPress={isRecording ? stopRecording : startRecording}
       >
-        <Text style={styles.buttonText}>{recording ? 'Arrêter' : 'Démarrer'}</Text>
+        <Text style={styles.buttonText}>
+          {isRecording ? 'Arrêter' : 'Démarrer'}
+        </Text>
       </TouchableOpacity>
+
+      {audioFile && (
+        <Text style={styles.path}>
+          Fichier : {audioFile}
+        </Text>
+      )}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
-  button: { padding: 20, borderRadius: 10 },
-  buttonText: { color: 'white', fontSize: 18 }
-});
-
 export default AudioRecordingScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  button: {
+    padding: 20,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+  },
+  path: {
+    marginTop: 20,
+    fontSize: 12,
+    color: '#555',
+  },
+});
