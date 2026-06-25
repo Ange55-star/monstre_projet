@@ -4,14 +4,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface AuthContextType {
   token: string | null;
   setToken: (token: string | null) => void;
-  logout: () => Promise<void>;
+  logout: () => void;
   isLoading: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType>({
   token: null,
   setToken: () => {},
-  logout: async () => {},
+  logout: () => {},
   isLoading: true,
 });
 
@@ -21,14 +21,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const loadToken = async () => {
-      try {
-        const storedToken = await AsyncStorage.getItem('token');
-        if (storedToken) setToken(storedToken);
-      } catch (err) {
-        console.log('Erreur load token:', err);
-      } finally {
-        setIsLoading(false);
-      }
+      const storedToken = await AsyncStorage.getItem('token');
+      if (storedToken) setToken(storedToken);
+      setIsLoading(false);
     };
 
     loadToken();

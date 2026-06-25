@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 
-import AudioRecorder from 'react-native-audio-recorder';
+//import AudioRecorder from 'react-native-audio-recorder';
 
 const AudioRecordingScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
